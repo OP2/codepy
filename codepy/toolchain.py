@@ -272,6 +272,28 @@ class GCCToolchain(GCCLikeToolchain):
 
 
 
+class IntelToolchain(GCCToolchain):
+    def get_version_tuple(self):
+        ver = self.get_version()
+        lines = ver.split("\n")
+        words = lines[0].split()
+        numbers = words[2].split(".") + [words[3]]
+
+        result = []
+        for n in numbers:
+            try:
+                result.append(int(n))
+            except ValueError:
+                # not an integer? too bad.
+                break
+
+        return tuple(result)
+
+    def _cmdline(self, *args, **kwargs):
+        return GCCToolchain._cmdline(self, *args, **kwargs)
+
+
+
 class NVCCToolchain(GCCLikeToolchain):
     def get_version_tuple(self):
         ver = self.get_version()
@@ -429,6 +451,8 @@ def guess_toolchain():
                 kwargs["cflags"].extend(['-arch', 'i386'])
 
         return GCCToolchain(**kwargs)
+    elif "Intel Corporation" in version:
+        return IntelToolchain(**kwargs)
     else:
         raise ToolchainGuessError("unknown compiler")
 
