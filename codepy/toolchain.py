@@ -456,23 +456,32 @@ def guess_toolchain():
     else:
         raise ToolchainGuessError("unknown compiler")
 
+def which(file):
+    import os
+    for path in os.environ["PATH"].split(":"):
+        if os.path.exists(path + "/" + file):
+                return path + "/" + file
 
-
+    return None
 
 def guess_nvcc_toolchain():
-    gcc_kwargs = _guess_toolchain_kwargs_from_python_config()
+    cc_kwargs = _guess_toolchain_kwargs_from_python_config()
+    cflags=["-Xcompiler", ",".join(cc_kwargs["cflags"])]
+
+    if isinstance(guess_toolchain(), IntelToolchain):
+        cflags = cflags + ['-ccbin', which(cc_kwargs['cc'])]
 
     kwargs = dict(
             cc="nvcc",
             ldflags=[],
-            libraries=gcc_kwargs["libraries"],
-            cflags=["-Xcompiler", ",".join(gcc_kwargs["cflags"])],
-            include_dirs=gcc_kwargs["include_dirs"],
-            library_dirs=gcc_kwargs["library_dirs"],
-            so_ext=gcc_kwargs["so_ext"],
-            o_ext=gcc_kwargs["o_ext"],
-            defines=gcc_kwargs["defines"],
-            undefines=gcc_kwargs["undefines"],
+            libraries=cc_kwargs["libraries"],
+            cflags=cflags,
+            include_dirs=cc_kwargs["include_dirs"],
+            library_dirs=cc_kwargs["library_dirs"],
+            so_ext=cc_kwargs["so_ext"],
+            o_ext=cc_kwargs["o_ext"],
+            defines=cc_kwargs["defines"],
+            undefines=cc_kwargs["undefines"],
             )
     kwargs.setdefault("undefines", []).append("__BLOCKS__")
     kwargs["cc"] = "nvcc"
