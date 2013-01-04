@@ -469,7 +469,13 @@ def guess_nvcc_toolchain():
     cflags=["-Xcompiler", ",".join(cc_kwargs["cflags"])]
 
     if isinstance(guess_toolchain(), IntelToolchain):
-        cflags = cflags + ['-ccbin', which(cc_kwargs['cc'])]
+        cflags = cflags + ['-ccbin', '/home/grm08/ics-paper/install/bin-off-path/icc', \
+                           '-Xcompiler', '-isystem', \
+                           '-Xcompiler', '/home/grm08/ics-paper/install/system-include',
+                           '-I', '/home/grm08/ics-paper/install/include', \
+                           '-Xcompiler', '-w', \
+                           '-Xlinker', '-L/apps/boost/1.49.0/boost_1_49_0/stage/lib']
+
 
     kwargs = dict(
             cc="nvcc",

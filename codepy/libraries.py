@@ -4,7 +4,7 @@ from __future__ import division
 
 __copyright__ = "Copyright (C) 2008 Andreas Kloeckner"
 
-
+from toolchain import IntelToolchain
 
 
 from pytools import memoize
@@ -103,11 +103,15 @@ def get_boost_libname(basename, aksetup):
 def add_boost_python(toolchain):
     aksetup = get_aksetup_config()
     import sys
+    if isinstance(toolchain, IntelToolchain):
+        libname = ["boost_python"]
+    else:
+        libname = get_boost_libname("python", aksetup)
     toolchain.add_library(
             "boost-python",
             aksetup.get("BOOST_INC_DIR", []),
             aksetup.get("BOOST_LIB_DIR", []),
-            get_boost_libname("python", aksetup)
+            libname
             + ["python%d.%d" %  sys.version_info[:2]]
             )
 
