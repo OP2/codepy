@@ -16,7 +16,10 @@ class Toolchain(Record):
     def __init__(self, *args, **kwargs):
         if 'features' not in kwargs:
             kwargs['features'] = set()
+        if 'sys_include_dirs' not in kwargs:
+            kwargs['sys_include_dirs'] = []
         Record.__init__(self, *args, **kwargs)
+        self.sys_include_dirs = []
 
     def get_version(self):
         """Return a string describing the exact version of the tools (compilers etc.)
@@ -59,6 +62,9 @@ class Toolchain(Record):
                 self.library_dirs.append(ldir)
 
         self.libraries = libraries + self.libraries
+
+    def add_system_include(self, include_dirs):
+        self.sys_include_dirs = self.sys_include_dirs + include_dirs
 
     def get_dependencies(self,  source_files):
         """Return a list of header files referred to by *source_files.
@@ -143,6 +149,7 @@ class GCCLikeToolchain(Toolchain):
                 + ["-D%s" % define for define in self.defines]
                 + ["-U%s" % undefine for undefine in self.undefines]
                 + ["-I%s" % idir for idir in self.include_dirs]
+                + ["-isystem %s" % idir for idir in self.sys_include_dirs]
                 + self.cflags
                 + source_files
                 )
@@ -237,6 +244,7 @@ class GCCToolchain(GCCLikeToolchain):
             ld_options = self.ldflags
             link = ["-L%s" % ldir for ldir in self.library_dirs]
             link.extend(["-l%s" % lib for lib in self.libraries])
+
         return (
             [self.cc]
             + self.cflags
@@ -244,6 +252,7 @@ class GCCToolchain(GCCLikeToolchain):
             + ["-D%s" % define for define in self.defines]
             + ["-U%s" % undefine for undefine in self.undefines]
             + ["-I%s" % idir for idir in self.include_dirs]
+            + ["-isystem %s" % idir for idir in self.sys_include_dirs]
             + files
             + link
             )
@@ -474,7 +483,7 @@ def guess_nvcc_toolchain():
                            '-Xcompiler', '/home/grm08/ics-paper/install/system-include',
                            '-I', '/home/grm08/ics-paper/install/include', \
                            '-Xcompiler', '-w', \
-                           '-Xlinker', '-L/apps/boost/1.49.0/boost_1_49_0/stage/lib']
+                           '-Xlinker', '-L/home/grm08/ics-paper/boost_1_46_1/lib']
 
 
     kwargs = dict(

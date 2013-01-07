@@ -59,6 +59,7 @@ class CudaModule(object):
 
         from codepy.libraries import add_boost_python, add_cuda
         host_toolchain = host_toolchain.copy()
+        host_toolchain.add_system_include(['/home/grm08/ics-paper/boost_1_46_1'])
         add_boost_python(host_toolchain)
         add_cuda(host_toolchain)
 
